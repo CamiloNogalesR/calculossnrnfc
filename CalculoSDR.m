@@ -1,7 +1,7 @@
 %% Calculos de Potencias
 clc,clear,close
 % Leer el archivo .wav que contiene los datos IQ
-[x, fs] = audioread('SDRSharp_20240224_NFC025MSPS_13560000Hz_IQ.wav');
+[x, fs] = audioread('SDRSharp_20240227_RUIDO_13560000Hz_AF.wav');
 
 % Separar el vector en dos partes: I y Q
 x = reshape(x, [], 2);
@@ -9,8 +9,8 @@ I = x(:, 1);
 Q = x(:, 2);
 
 % Calcular la potencia de cada muestra compleja
-P = mean([I Q].^2, 2);
-
+P = mean((abs(I+1j*Q)).^2, 2);
+vP_dB = 10*log10(P);
 % Convertir la potencia a dBW
 P_dBW = 10 * log10(P / 1);
 
@@ -58,4 +58,47 @@ NT1 = PT1 - SNR_NFC_dB;
 NT2 = PT2 - SNR_NFC_dB;
 
 disp(['Por tanto los valores teoricos del ruido estan entre : ' ...
-    num2str(NT1) ' dB  y  ' num2str(NT2) ' dB'])
+    num2str(NT1) ' dBW  y  ' num2str(NT2) ' dBW'])
+
+%% Valores ruido
+muestraIQ = I +1j.*Q; %Muestras del Ruido
+AmplitudIQ = abs(muestraIQ);
+t1 = 1:1:size(x(:,1));
+
+subplot(3,1,1)
+plot(t1,AmplitudIQ)
+title('Ruido')
+Valmax = max(AmplitudIQ);
+
+[x1, fs] = audioread('SDRSharp_20240227_SEÑAL_13560000Hz_AF.wav');
+
+% Separar el vector en dos partes: I y Q MUESTRAS DE LA SEÑAL
+x1 = reshape(x1, [], 2);
+Ia = x1(:, 1);
+Qa = x1(:, 2);
+t2 = 1:1:size(x1(:,1));
+
+muestraIQSignal = Ia +1j.*Qa;
+AmplitudIQa = abs(muestraIQSignal);
+subplot(3,1,2)
+plot(t2,AmplitudIQa,'r')
+title('Señal con Ruido')
+vSignal = AmplitudIQa(AmplitudIQa > Valmax);
+
+t3 = 1:1:size(vSignal(:,1));
+
+subplot(3,1,3)
+plot(t3,vSignal,'g')
+title('Señal por encima del Umbral')
+%% Potencias de cada señal
+%Potencia del ruido
+Pruido = mean((AmplitudIQ).^2)
+Pruido_dBW = 10*log10(Pruido)
+
+%Potencia señal
+Psignal = mean((vSignal).^2)
+Psig_dBW = 10*log10(Psignal)
+
+
+%SNR
+P_SNR_dB = Psig_dBW - Pruido_dBW

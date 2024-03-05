@@ -12,7 +12,7 @@ Q = x(:, 2);
 %% Valores ruido
 muestraIQ = I +1j.*Q; %Muestras del Ruido
 AmplitudIQ = abs(muestraIQ); %La amplitud de la muestra IQ es el valor absoluto del mismo
-t1 = 1:1:size(x(:,1));
+t1 = 1:1:size(x(:,1)); %vector tiempo para grafica de amplitudes
 
 subplot(3,1,1)
 plot(t1,AmplitudIQ)
